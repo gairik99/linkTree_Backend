@@ -44,6 +44,7 @@ const updateUser = async (req, res) => {
     }
 
     res.status(200).json({
+      status: "ok",
       message: "Profile updated successfully",
       user,
     });
