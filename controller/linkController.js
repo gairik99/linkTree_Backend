@@ -1,8 +1,6 @@
+const { get } = require("mongoose");
 const Link = require("../models/linkModel");
 
-// @desc    Create a new link
-// @route   POST /api/links
-// @access  Private
 const createLink = async (req, res) => {
   try {
     // Get authenticated user ID from middleware
@@ -65,6 +63,20 @@ const createLink = async (req, res) => {
   }
 };
 
+// Get all links
+const getLinks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const links = await Link.find({ user: userId });
+    res.status(200).json({ success: true, data: links });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: "Server Error", error: error.message });
+  }
+};
+
 module.exports = {
   createLink,
+  getLinks,
 };
