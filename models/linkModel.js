@@ -18,13 +18,11 @@ const linkSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      required: [true, "Provide a category"],
       trim: true,
     },
     user: {
       type: Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
   },
   { timestamps: true }
