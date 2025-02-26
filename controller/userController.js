@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 const updateUser = async (req, res) => {
   try {
@@ -12,6 +14,10 @@ const updateUser = async (req, res) => {
       "userName",
       "imageurl",
       "category",
+      "bio",
+      "bannerBackground",
+      "bannerColor",
+      "password",
     ];
     const updates = req.body;
 
@@ -31,7 +37,9 @@ const updateUser = async (req, res) => {
         validFields: allowedUpdates,
       });
     }
-
+    if (updates.password) {
+      updates.password = await bcrypt.hash(updates.password, saltRounds);
+    }
     // Update the user
     const user = await User.findByIdAndUpdate(
       userId,

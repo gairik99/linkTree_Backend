@@ -28,6 +28,9 @@ const userSchema = new mongoose.Schema(
     },
     imageurl: String,
     category: String,
+    bio: String,
+    bannerColor: String,
+    bannerBackground: String,
     agree: {
       type: Boolean,
       default: false,
