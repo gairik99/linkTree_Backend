@@ -31,6 +31,11 @@ const userSchema = new mongoose.Schema(
     bio: String,
     bannerColor: String,
     bannerBackground: String,
+    buttonAlignment: String,
+    buttonStyle: String,
+    buttonColor: String,
+    buttonFontColor: String,
+    theme: String,
     agree: {
       type: Boolean,
       default: false,

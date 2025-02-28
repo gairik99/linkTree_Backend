@@ -18,6 +18,11 @@ const updateUser = async (req, res) => {
       "bannerBackground",
       "bannerColor",
       "password",
+      "buttonAlignment",
+      "buttonStyle",
+      "buttonColor",
+      "buttonFontColor",
+      "theme",
     ];
     const updates = req.body;
 
