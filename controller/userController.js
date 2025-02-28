@@ -23,6 +23,7 @@ const updateUser = async (req, res) => {
       "buttonColor",
       "buttonFontColor",
       "theme",
+      "email",
     ];
     const updates = req.body;
 
