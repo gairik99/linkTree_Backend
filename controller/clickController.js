@@ -9,10 +9,10 @@ const createClick = async (req, res) => {
     const linkId = req.params.linkId;
 
     // Validate required fields
-    if (!user || !domain || !category) {
+    if (!user || !category || !domain) {
       return res.status(400).json({
         status: "error",
-        message: "Missing required fields: user, domain, or category",
+        message: "Missing required fields: user,  or category",
       });
     }
 

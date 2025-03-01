@@ -1,4 +1,4 @@
-const { get } = require("mongoose");
+const mongoose = require("mongoose");
 const Link = require("../models/linkModel");
 
 const createLink = async (req, res) => {
@@ -168,9 +168,52 @@ const deleteLink = async (req, res) => {
   }
 };
 
+const getUserLinksWithClicks = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const links = await Link.aggregate([
+      {
+        $match: { user: new mongoose.Types.ObjectId(userId) }, // Add 'new' here
+      },
+      {
+        $lookup: {
+          from: "clicks",
+          localField: "_id",
+          foreignField: "link",
+          as: "clicks",
+        },
+      },
+      {
+        $addFields: {
+          totalClicks: { $size: "$clicks" },
+        },
+      },
+      {
+        $project: {
+          clicks: 0,
+        },
+      },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        links,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   createLink,
   getLinks,
   updateLink,
   deleteLink,
+  getUserLinksWithClicks,
 };
