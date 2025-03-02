@@ -58,4 +58,44 @@ const createClick = async (req, res) => {
   }
 };
 
-module.exports = { createClick };
+const getUserClicksByCategory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const clicksByCategory = await Click.aggregate([
+      {
+        $match: {
+          user: new mongoose.Types.ObjectId(userId),
+        },
+      },
+      {
+        $group: {
+          _id: "$category",
+          count: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: {
+            $ifNull: ["$_id", "uncategorized"],
+          },
+          count: 1,
+        },
+      },
+      { $sort: { count: -1 } },
+    ]);
+
+    res.status(200).json({
+      status: "success",
+      data: clicksByCategory,
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: "error",
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { createClick, getUserClicksByCategory };
