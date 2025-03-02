@@ -102,8 +102,7 @@ const getClicksByMonth = async (req, res) => {
   try {
     const userId = new mongoose.Types.ObjectId(req.user.id); // Convert to ObjectId
 
-    // console.log("UserId:", userId); // Debugging
-
+    // Fetch actual click data from the database
     const clicksByMonth = await Click.aggregate([
       { $match: { user: userId } }, // Filter by user
       {
@@ -115,12 +114,28 @@ const getClicksByMonth = async (req, res) => {
           totalClicks: { $sum: 1 },
         },
       },
-      { $sort: { "_id.year": -1, "_id.month": -1 } }, // Sort by latest month first
     ]);
 
-    // console.log("Aggregated Data:", clicksByMonth); // Debugging
+    // Get current year (or you can pass the year dynamically)
+    const currentYear = new Date().getFullYear();
 
-    res.status(200).json({ success: true, data: clicksByMonth });
+    // Create an array for all 12 months with totalClicks = 0 by default
+    const allMonths = Array.from({ length: 12 }, (_, i) => ({
+      _id: { year: currentYear, month: i + 1 }, // Months start from 1 (January)
+      totalClicks: 0,
+    }));
+
+    // Merge actual data with default months
+    const mergedData = allMonths.map((defaultMonth) => {
+      const found = clicksByMonth.find(
+        (data) =>
+          data._id.year === defaultMonth._id.year &&
+          data._id.month === defaultMonth._id.month
+      );
+      return found || defaultMonth;
+    });
+
+    res.status(200).json({ success: true, data: mergedData });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ success: false, message: "Server Error" });
