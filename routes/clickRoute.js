@@ -7,6 +7,6 @@ const {
 } = require("../controller/clickController");
 
 router.route("/createclick/:linkId?").post(createClick);
-router.route("/getlinksbycategory").get(validateToken, getUserClicksByCategory);
+router.route("/getclickbycategory").get(validateToken, getUserClicksByCategory);
 
 module.exports = router;
