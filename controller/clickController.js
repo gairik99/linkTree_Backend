@@ -98,4 +98,32 @@ const getUserClicksByCategory = async (req, res) => {
   }
 };
 
-module.exports = { createClick, getUserClicksByCategory };
+const getClicksByMonth = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.id); // Convert to ObjectId
+
+    // console.log("UserId:", userId); // Debugging
+
+    const clicksByMonth = await Click.aggregate([
+      { $match: { user: userId } }, // Filter by user
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" },
+          },
+          totalClicks: { $sum: 1 },
+        },
+      },
+      { $sort: { "_id.year": -1, "_id.month": -1 } }, // Sort by latest month first
+    ]);
+
+    // console.log("Aggregated Data:", clicksByMonth); // Debugging
+
+    res.status(200).json({ success: true, data: clicksByMonth });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ success: false, message: "Server Error" });
+  }
+};
+module.exports = { createClick, getUserClicksByCategory, getClicksByMonth };
