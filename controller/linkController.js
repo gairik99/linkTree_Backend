@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Link = require("../models/linkModel");
+const Click = require("../models/clickModel");
 
 const createLink = async (req, res) => {
   try {
@@ -210,10 +211,41 @@ const getUserLinksWithClicks = async (req, res) => {
   }
 };
 
+const getTopLinks = async (req, res) => {
+  try {
+    const userId = req.user.id; // ✅ Get user ID from `req.user`
+
+    // ✅ Aggregate to get linkUrl and totalClicks
+    const linksWithClicks = await Link.aggregate([
+      { $match: { user: new mongoose.Types.ObjectId(userId) } }, // Filter by user
+      {
+        $lookup: {
+          from: "clicks",
+          localField: "_id",
+          foreignField: "link",
+          as: "clicks",
+        },
+      },
+      {
+        $addFields: { totalClicks: { $size: "$clicks" } }, // Count clicks
+      },
+      { $sort: { totalClicks: -1 } }, // Sort by most clicks
+      { $limit: 6 }, // Get top 6 links
+      { $project: { linkUrl: 1, totalClicks: 1, _id: 0 } }, // ✅ Return only linkUrl & totalClicks
+    ]);
+
+    return res.status(200).json({ success: true, data: linksWithClicks });
+  } catch (error) {
+    console.error("Error fetching top links:", error);
+    return res.status(500).json({ success: false, message: "Server error" });
+  }
+};
+
 module.exports = {
   createLink,
   getLinks,
   updateLink,
   deleteLink,
   getUserLinksWithClicks,
+  getTopLinks,
 };
