@@ -17,7 +17,6 @@ const createLink = async (req, res) => {
       });
     }
 
-    // Create new link (domain is auto-generated in pre-save hook)
     const newLink = await Link.create({
       linkTitle,
       linkUrl,
@@ -40,7 +39,6 @@ const createLink = async (req, res) => {
       });
     }
 
-    // Handle duplicate URL for same user
     if (error.code === 11000) {
       return res.status(400).json({
         success: false,
@@ -48,7 +46,6 @@ const createLink = async (req, res) => {
       });
     }
 
-    // Handle invalid URL format (from pre-save hook)
     if (error.message.includes("Invalid URL")) {
       return res.status(400).json({
         success: false,
@@ -79,11 +76,11 @@ const getLinks = async (req, res) => {
 
 const updateLink = async (req, res) => {
   try {
-    const { linkId } = req.params; // Get linkId from URL params // Get updated fields from request body
+    const { linkId } = req.params;
 
     // Validate required fields
     const { linkTitle, linkUrl, domain } = req.body;
-    // Find the link by ID and update it
+
     const updatedLink = await Link.findByIdAndUpdate(
       linkId,
       {
@@ -154,7 +151,6 @@ const deleteLink = async (req, res) => {
   } catch (error) {
     console.error("Error deleting link:", error);
 
-    // Handle invalid ObjectId format
     if (error.name === "CastError") {
       return res.status(400).json({
         success: false,
@@ -175,7 +171,7 @@ const getUserLinksWithClicks = async (req, res) => {
 
     const links = await Link.aggregate([
       {
-        $match: { user: new mongoose.Types.ObjectId(userId) }, // Add 'new' here
+        $match: { user: new mongoose.Types.ObjectId(userId) },
       },
       {
         $lookup: {
@@ -213,11 +209,9 @@ const getUserLinksWithClicks = async (req, res) => {
 
 const getTopLinks = async (req, res) => {
   try {
-    const userId = req.user.id; // ✅ Get user ID from `req.user`
-
-    // ✅ Aggregate to get linkUrl and totalClicks
+    const userId = req.user.id;
     const linksWithClicks = await Link.aggregate([
-      { $match: { user: new mongoose.Types.ObjectId(userId) } }, // Filter by user
+      { $match: { user: new mongoose.Types.ObjectId(userId) } },
       {
         $lookup: {
           from: "clicks",
@@ -227,11 +221,11 @@ const getTopLinks = async (req, res) => {
         },
       },
       {
-        $addFields: { totalClicks: { $size: "$clicks" } }, // Count clicks
+        $addFields: { totalClicks: { $size: "$clicks" } },
       },
-      { $sort: { totalClicks: -1 } }, // Sort by most clicks
-      { $limit: 6 }, // Get top 6 links
-      { $project: { linkUrl: 1, totalClicks: 1, _id: 0 } }, // ✅ Return only linkUrl & totalClicks
+      { $sort: { totalClicks: -1 } },
+      { $limit: 6 },
+      { $project: { linkUrl: 1, totalClicks: 1, _id: 0 } },
     ]);
 
     return res.status(200).json({ success: true, data: linksWithClicks });

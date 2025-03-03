@@ -36,6 +36,8 @@ const userSchema = new mongoose.Schema(
     buttonColor: String,
     buttonFontColor: String,
     theme: String,
+    resetPasswordCode: String,
+    resetPasswordCodeExpire: Date,
     agree: {
       type: Boolean,
       default: false,
