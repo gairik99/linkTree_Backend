@@ -141,4 +141,85 @@ const getClicksByMonth = async (req, res) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
-module.exports = { createClick, getUserClicksByCategory, getClicksByMonth };
+
+const getTotalClicksByOS = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.id); // Get user ID from request
+
+    const clicks = await Click.aggregate([
+      {
+        $match: { user: userId }, // Filter clicks by user
+      },
+      {
+        $set: {
+          "device.os.name": { $ifNull: ["$device.os.name", "others"] }, // Replace null or missing OS name with "others"
+        },
+      },
+      {
+        $group: {
+          _id: "$device.os.name",
+          totalClicks: { $sum: 1 },
+        },
+      },
+    ]);
+
+    res.status(200).json({ success: true, data: clicks });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+const getClicksByDomain = async (req, res) => {
+  try {
+    const userId = new mongoose.Types.ObjectId(req.user.id); // Get user ID from request
+
+    const clicks = await Click.aggregate([
+      {
+        $match: { user: userId, domain: { $ne: "others" } }, // Exclude 'others' domain
+      },
+      {
+        $group: {
+          _id: "$domain",
+          totalClicks: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { totalClicks: -1 },
+      }, // Sort in descending order
+      {
+        $facet: {
+          topDomains: [{ $limit: 3 }], // Get top 3 domains
+          rest: [
+            { $skip: 3 },
+            {
+              $group: { _id: "others", totalClicks: { $sum: "$totalClicks" } },
+            },
+          ], // Group rest as 'others'
+        },
+      },
+      {
+        $project: {
+          data: { $concatArrays: ["$topDomains", "$rest"] }, // Merge results
+        },
+      },
+      {
+        $unwind: "$data",
+      },
+      {
+        $replaceRoot: { newRoot: "$data" },
+      },
+    ]);
+
+    res.status(200).json({ success: true, data: clicks });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+module.exports = {
+  createClick,
+  getUserClicksByCategory,
+  getClicksByMonth,
+  getTotalClicksByOS,
+  getClicksByDomain,
+};
