@@ -8,7 +8,7 @@ Before setting up the project, make sure you have the following installed:
 
 ---
 
-## 📦 2. Install Dependencies
+## 📦 Install Dependencies
 
 Run the following command inside the project folder:
 ```
@@ -17,7 +17,7 @@ npm install
 This will install all required packages listed in `package.json`.
 
 
-## 📜 4. Project Structure
+## 📜  Project Structure
 
 ```
 `/spark-backend
@@ -30,6 +30,6 @@ This will install all required packages listed in `package.json`.
 │── package.json   # Dependencies & Scripts` 
 ```
 
-## ✅ 5. Deployment (Optional)
+## ✅ Deployment (Optional)
 
 To deploy on **Render/Vercel/Heroku**, set up environment variables in their dashboard and push the code.
