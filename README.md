@@ -21,7 +21,7 @@ This will install all required packages listed in `package.json`.
 
 ```
 `/spark-backend
-│── /config        # Database & Server Configurations
+│── /server        # Database & Server Configurations
 │── /models        # Mongoose Models
 │── /routes        # API Routes
 │── /controllers   # Business Logic for Routes
