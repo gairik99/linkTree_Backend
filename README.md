@@ -24,9 +24,11 @@ This will install all required packages listed in `package.json`.
 │── /server        # Database & Server Configurations
 │── /models        # Mongoose Models
 │── /routes        # API Routes
-│── /controllers   # Business Logic for Routes
+│── /controller    # Business Logic for Routes
+│── /middleware    # request verification 
+│── /utils         # nodeMailer Setup
 │── .env           # Environment Variables (Not to be committed)
-│── index.js       # Main Entry Point
+│── App.js         # Main Entry Point
 │── package.json   # Dependencies & Scripts` 
 ```
 
