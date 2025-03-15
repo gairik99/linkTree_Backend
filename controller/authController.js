@@ -10,27 +10,34 @@ const generateResetCode = () => {
 };
 const login = async (req, res) => {
   try {
-    const email = req.body.email;
+    const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) res.status(400).json({ messge: "user not found" });
-    const isMatch = await bcrypt.compare(req.body.password, user.password);
-    if (!isMatch) {
-      res.status(403).json({ message: "Not authorized" });
-    }
+
+    if (!user) return res.status(400).json({ message: "User not found" });
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(403).json({ message: "Not authorized" });
+
+    // Generate unique jti for the token
+    const jti = crypto.randomBytes(16).toString("hex");
     const token = jwt.sign(
-      { email: user.email, id: user._id },
+      { email: user.email, id: user._id, jti },
       process.env.JWT_KEY,
       { expiresIn: "90d" }
     );
 
-    const { password, ...userWithoutPassword } = user.toObject();
-    res.status(200).json({
-      status: "ok",
-      token,
-      user: userWithoutPassword,
-    });
+    // Add new session and enforce 2-device limit
+    user.activeSessions.push({ jti });
+    user.activeSessions.sort((a, b) => b.createdAt - a.createdAt);
+    if (user.activeSessions.length > 2) {
+      user.activeSessions = user.activeSessions.slice(0, 2);
+    }
+    await user.save();
+
+    const { password: _, ...userWithoutPassword } = user.toObject();
+    res.status(200).json({ status: "ok", token, user: userWithoutPassword });
   } catch (err) {
-    res.status(404).json({ message: "user not found" });
+    res.status(500).json({ message: "Login failed" });
   }
 };
 

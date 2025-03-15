@@ -42,6 +42,15 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    activeSessions: [
+      {
+        jti: String, // Unique identifier for each token
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );

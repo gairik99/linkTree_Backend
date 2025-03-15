@@ -1,4 +1,5 @@
-const jwt = require("jsonwebtoken"); // import jsonwebtoken
+const jwt = require("jsonwebtoken");
+const User = require("../models/userModel"); // import jsonwebtoken
 
 const validateToken = async (req, res, next) => {
   // function to validate token
@@ -10,6 +11,20 @@ const validateToken = async (req, res, next) => {
     }
     const token = bearer.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res.status(401).json({ message: "User not found" });
+    }
+    const validSession = user.activeSessions.some(
+      (session) => session.jti === decoded.jti
+    );
+
+    if (!validSession) {
+      return res.status(401).json({
+        message: "Session expired. Please log in again.",
+      });
+    }
     if (decoded) {
       req.user = decoded; // set user in request object
       //   console.log(decoded);
