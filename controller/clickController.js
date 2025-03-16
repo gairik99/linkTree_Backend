@@ -29,8 +29,8 @@ const createClick = async (req, res) => {
       user,
       link: linkId || undefined,
       domain,
-      category,
       ip: req.ip || "unknown",
+      category,
       device: {
         type: device.type || "desktop",
         browser: {
