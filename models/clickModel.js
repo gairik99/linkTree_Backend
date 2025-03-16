@@ -34,6 +34,11 @@ const clickSchema = new mongoose.Schema(
         name: String,
         version: String,
       },
+      ip: {
+        type: String,
+        trim: true,
+        required: true,
+      },
       vendor: String,
     },
   },

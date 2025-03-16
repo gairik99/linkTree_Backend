@@ -1,5 +1,4 @@
 const Click = require("../models/clickModel.js");
-const Link = require("../models/linkModel.js");
 const mongoose = require("mongoose");
 const UAParser = require("ua-parser-js");
 
@@ -31,6 +30,7 @@ const createClick = async (req, res) => {
       link: linkId || undefined,
       domain,
       category,
+      ip: req.ip || "unknown",
       device: {
         type: device.type || "desktop",
         browser: {
