@@ -6,7 +6,8 @@ const createClick = async (req, res) => {
   try {
     const { user, domain, category } = req.body;
     const linkId = req.params.linkId;
-
+    const ip =
+      req.headers["x-forwarded-for"]?.split(",")[0] || req.ip || "unknown";
     // Validate required fields
     if (!user || !category || !domain) {
       return res.status(400).json({
@@ -29,7 +30,7 @@ const createClick = async (req, res) => {
       user,
       link: linkId || undefined,
       domain,
-      ip: req.ip || "unknown",
+      ip,
       category,
       device: {
         type: device.type || "desktop",
