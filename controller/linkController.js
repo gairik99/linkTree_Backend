@@ -168,10 +168,23 @@ const deleteLink = async (req, res) => {
 const getUserLinksWithClicks = async (req, res) => {
   try {
     const userId = req.user.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = 4;
+    const skip = (page - 1) * limit;
+    const category = req.query.category;
+
+    // Build dynamic match condition
+    const matchStage = {
+      user: new mongoose.Types.ObjectId(userId),
+    };
+
+    if (category) {
+      matchStage.category = category;
+    }
 
     const links = await Link.aggregate([
       {
-        $match: { user: new mongoose.Types.ObjectId(userId) },
+        $match: matchStage,
       },
       {
         $lookup: {
@@ -191,11 +204,17 @@ const getUserLinksWithClicks = async (req, res) => {
           clicks: 0,
         },
       },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
     ]);
 
     res.status(200).json({
       status: "success",
       data: {
+        page,
+        perPage: limit,
+        category: category || null,
         links,
       },
     });
