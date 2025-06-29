@@ -3,6 +3,12 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const crypto = require("crypto");
 const transporter = require("../utils/nodemailers");
+const {
+  registerSchema,
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
+} = require("../validators/userValidator");
 
 const saltRounds = 10;
 const generateResetCode = () => {
@@ -10,6 +16,9 @@ const generateResetCode = () => {
 };
 const login = async (req, res) => {
   try {
+    const { error } = loginSchema.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
     const { email, password } = req.body;
     const user = await User.findOne({ email });
 
@@ -43,6 +52,9 @@ const login = async (req, res) => {
 
 const createUser = async (req, res) => {
   try {
+    const { error } = registerSchema.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
     req.body.password = await bcrypt.hash(req.body.password, saltRounds);
     const newUser = await User.create(req.body);
 
@@ -60,6 +72,9 @@ const createUser = async (req, res) => {
 
 const forgotPassword = async (req, res) => {
   try {
+    const { error } = forgotPasswordSchema.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
     const user = await User.findOne({ email: req.body.email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -88,8 +103,10 @@ const forgotPassword = async (req, res) => {
 
 const resetPassword = async (req, res) => {
   try {
+    const { error } = resetPasswordSchema.validate(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
     const { email, code, newPassword } = req.body;
-
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: "User not found" });
 
